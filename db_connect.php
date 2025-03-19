@@ -10,5 +10,8 @@ if ($conn->connect_error) {
 }
 
 function disconnect(){
+}
     
+function connect() {
+    // definition for connecting to DB
 }

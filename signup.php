@@ -5,22 +5,28 @@ $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = htmlspecialchars($_POST["username"]);
     $email = htmlspecialchars($_POST["email"]);
-    $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
 
-    $checkuser = $conn->prepare("SELECT * FROM users WHERE email=?");
-    $checkuser->bind_param("s", $email);
-    $checkuser->execute();
-    $result = $checkuser->get_result();
-
-    if ($result->num_rows > 0) {
-        $message = "<span class='error'>Email already exists. Try logging in.</span>";
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "<span class='error'>Invalid email format. Please enter a valid email.</span>";
     } else {
-        $stmt = $conn->prepare("INSERT INTO users(username,email,password) VALUES(?,?,?)");
-        $stmt->bind_param("sss", $username, $email, $password);
-        if ($stmt->execute()) {
-            $message = "<span class='success'>Signup successful! <a href='login.php'>Login here</a></span>";
+        $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
+
+        $checkuser = $conn->prepare("SELECT * FROM users WHERE email=?");
+        $checkuser->bind_param("s", $email);
+        $checkuser->execute();
+        $result = $checkuser->get_result();
+
+        if ($result->num_rows > 0) {
+            $message = "<span class='error'>Email already exists. Try logging in.</span>";
         } else {
-            $message = "<span class='error'>Signup failed. Please try again.</span>";
+            $stmt = $conn->prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)");
+            $stmt->bind_param("sss", $username, $email, $password);
+
+            if ($stmt->execute()) {
+                $message = "<span class='success'>Signup successful! <a href='login.php'>Login here</a></span>";
+            } else {
+                $message = "<span class='error'>Signup failed. Please try again.</span>";
+            }
         }
     }
 }
@@ -81,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             margin-left: 10px;
         }
 
-        button:hover {
+        button:hover {  
             background-color: #218838;
         }
 
@@ -91,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     .message {
         text-align: center;
-        margin-bottom: 10px;
+        margin-top: 10px;
     }
 
     .error {
@@ -121,7 +127,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 Already have an account? <a href="login.php">Login here</a>
             </div>
             <div class="message">
-            <?php if (!empty($message)) echo $message; ?>
+            <?php if (!empty($message)) 
+               echo $message; ?>
         </div>
         </form>
     </div>

@@ -1,5 +1,7 @@
 <?php
 include "db_connect.php";
+$message = ""; 
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = htmlspecialchars($_POST["username"]);
     $email = htmlspecialchars($_POST["email"]);
@@ -11,14 +13,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $checkuser->get_result();
 
     if ($result->num_rows > 0) {
-        echo "Email already exists.Try logging in";
+        $message = "<span class='error'>Email already exists. Try logging in.</span>";
     } else {
         $stmt = $conn->prepare("INSERT INTO users(username,email,password) VALUES(?,?,?)");
         $stmt->bind_param("sss", $username, $email, $password);
         if ($stmt->execute()) {
-            echo "Signup successfull <a href='login.php'>Login here</a>";
+            $message = "<span class='success'>Signup successful! <a href='login.php'>Login here</a></span>";
         } else {
-            echo "signup failed";
+            $message = "<span class='error'>Signup failed. Please try again.</span>";
         }
     }
 }
@@ -27,12 +29,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign up</title>
-    <style>
+      <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -46,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: #fff;
             padding: 20px;
             width: 100%;
-            height: 55%;
+            min-height: 55%;
             max-width: 360px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
@@ -88,5 +89,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             text-align: center;
             margin-top: 10px;
         }
+    .message {
+        text-align: center;
+        margin-bottom: 10px;
+    }
 
-        </style </head><body><div class="container"><h2>Welcome to To Do List</h2><h3>Sign up</h3><form method="post" action="signup.php"><input type="text" name="username" placeholder="Username" required><input type="email" name="email" placeholder="Email" required><input type="password" name="password" placeholder="Password" required><button type="submit">Sign up</button><div class="link">Already have an account? <a href="login.php">Login here</a></div></form></div></body></html>
+    .error {
+        color: red;
+       
+    }
+
+    .success {
+        color: #28a745;
+        
+    }
+
+        </style
+</head>
+<body>
+<body>
+    <div class="container">
+        <h2>Welcome to To Do List</h2>
+        <h3>Sign up</h3>
+        
+        <form method="post" action="signup.php">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign up</button>
+            <div class="link">
+                Already have an account? <a href="login.php">Login here</a>
+            </div>
+            <div class="message">
+            <?php if (!empty($message)) echo $message; ?>
+        </div>
+        </form>
+    </div>
+</body>
+
+</body>
+</html>

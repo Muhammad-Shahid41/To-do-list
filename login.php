@@ -1,9 +1,50 @@
-<!DOCTYPE html>
+<?php
+session_start();
+include "db_connect.php";
+$message=" ";
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    $email = $_POST["email"];
+    $password = $_POST["password"];
+    
+    if(empty($email) || empty($password)){
+        echo "Please fill in all fields";
+        exit();
+    }
+
+    $sql= "SELECT * FROM users WHERE email= ?";
+    $stmt= $conn->prepare($sql);
+    $stmt->bind_param("s",$email);
+    $stmt->execute();
+
+    $result=$stmt->get_result();
+
+    if($result->num_rows ==1){
+        $user =$result->fetch_assoc();
+        if(password_verify($password,$user["PASSWORD"])){
+            $_SESSION["user_id"]=$user["ID"];
+            $_SESSION["username"]=$user["USERNAME"];
+            header("Location: dashboard.php");
+            exit();
+        }
+        else{
+            $message= "<span class='error'>Invalid password</span>";
+        }
+    }
+    else{
+        $message= "<span class='error'>user not found</span>";
+    }
+    $stmt->close();
+    $conn->close();
+}
+
+?>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -51,7 +92,14 @@
             background-color: #218838; 
         }
         .link {
-             text-align: center; margin-top: 10px; 
+             text-align: center;
+              margin-top: 10px; 
+            }
+            .message{
+                text-align: center;
+            }
+            .error{
+                color: red;
             }
     </style>
 </head>
@@ -64,6 +112,11 @@
             <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
+            <div class="message">
+               <?php if(!empty($message))
+                  echo $message;
+               ?>
+            </div>
         </form>
         <div class="link">
             Don't have an account? <a href="signup.php">Sign up here</a>

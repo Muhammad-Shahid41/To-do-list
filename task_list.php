@@ -123,7 +123,7 @@ th {
         </tr>
         <?php while($task = $result->fetch_assoc()): ?>
             <tr>
-                <td class="<?= $task['Status']== 'completed' ? 'completed': '' ?>">
+                <td class="<?= $task['Status']== 'Done' ? 'Done': '' ?>">
                 <?= htmlspecialchars($task['TITLE'])?>
         </td>
             <td><?= htmlspecialchars($task['Description'])?></td>
@@ -131,8 +131,8 @@ th {
             <td><?= $task['Status']?></td>
             <td>
 
-                <?php if($task['Status'] !="completed"): ?>
-                    <form action="mark_completed.php" method="POST"></form>
+                <?php if($task['Status'] !="Done"): ?>
+                    <form action="mark_completed.php" method="POST">
                     <input type="hidden" name="task_id" value="<?=$task['ID'] ?>">
                     <input type="hidden" name="Status" value="completed">
                     <button type="submit" class="action-btn complete-btn">✔️Mark Done</button>
